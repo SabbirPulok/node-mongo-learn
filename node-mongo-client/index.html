@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <title>Node Mongo</title>
+</head>
+<body>
+    <h1>Node Mongo DB Site</h1>
+    <p id="userName"></p>
+    <div class="container">
+        <div class="row">
+            <input id="name" type="text" class="form-control m-3" placeholder="Type Product Name Here">
+            <input id="price" type="text" class="form-control m-3" placeholder="Type Product Price Here">
+            <input id="stock" type="text" class="form-control m-3" placeholder="Type Product Stock Here">
+            <button id="addProduct" class="btn btn-primary m-3">Add Product</button>
+        </div>
+        <button class="btn btn-success m-3" style="display:none" id="successMessage">
+            Successfully Added.
+        </button>
+        <div class="row" id="showProducts"></div>
+    </div>
+    <script>
+        //getData
+        fetch("http://localhost:4200/products")
+        .then(res => res.json())
+        .then(data => {
+            data.map(product => {
+                showProductCard(product);
+            })
+        })
+
+        function showProductCard(product)
+        {
+            const showProducts = document.getElementById('showProducts');
+            
+            const card = document.createElement('div');
+            card.className = 'card shadow cursor-pointer m-3';
+            card.style.width = "18rem";
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+
+            const productName = document.createElement('h2');
+            productName.className = "card-title";
+            productName.innerText = product.name;
+
+            const productPrice = document.createElement('h4');
+            productPrice.className = "card-text";
+            productPrice.innerText = `$${product.price}`;
+
+            const productStock = document.createElement('p');
+            productStock.className = "card-text";
+            productStock.innerText = `${product.stock} items available.`;
+
+            cardBody.appendChild(productName);
+            cardBody.appendChild(productPrice);
+            cardBody.appendChild(productStock);
+
+            card.appendChild(cardBody);
+            showProducts.appendChild(card);
+        } 
+
+        const btnAddProduct = document.getElementById("addProduct");
+        btnAddProduct.addEventListener("click",()=>{
+            const name = document.getElementById("name").value;
+            const price = parseFloat(document.getElementById("price").value); //Shift+Alt+down_arrow to copy multi-line
+            const stock = parseInt(document.getElementById("stock").value);
+
+            const product = {name,price,stock};
+
+            fetch('http://localhost:4200/addProduct',{
+                method: 'POST',
+                body:JSON.stringify(product),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateProduct(data);
+                console.log(data);
+                document.getElementById("name").value = "";
+                document.getElementById("stock").value = "";
+                document.getElementById("price").value = "";
+                const success = document.getElementById('successMessage');
+                success.style.display = "block";
+                setTimeout(()=>{
+                    success.style.display = "none";
+                },5000);
+            })
+        })
+        function updateProduct(product)
+        {
+            showProductCard(product);
+            document.getElementById('userName').innerText = product.name;
+        }
+    </script>
+</body>
+</html>
