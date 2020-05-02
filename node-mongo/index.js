@@ -10,9 +10,7 @@ app.use(bodyParser.json());
 
 const user = ["Jahid","Rakib","Sohan","Gatsby","Barfi"];
 
-const dbName = process.env.DB_USER;
-const dbPassword = process.env.DB_PASS;
-const uri = `mongodb+srv://${dbName}:${dbPassword}@cluster0-7jd2h.mongodb.net/test?retryWrites=true&w=majority`;
+const uri = process.env.DB_PATH;
 let client = new MongoClient(uri, { useNewUrlParser: true });
 
 app.get('/',(req,res)=>{
