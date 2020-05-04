@@ -36,11 +36,11 @@ app.get('/products',(req,res)=>{
             }
             else
             {
-                console.log("Successfully Inserted ");
+                //console.log("Successfully Inserted ");
                 res.send(documents);
             }
         });
-        console.log("database connected....");
+        //console.log("database connected....");
         client.close();
     });
 })
@@ -52,13 +52,71 @@ app.get('/fruits/banana',(req,res)=>{
     })
 })
 
-app.get('/users/:id',(req,res)=>{
-    const id = req.params.id;
-    const sortQuery = req.query.sort;
-    console.log(sortQuery);
-    const name = user[id];
-    res.send({id,name});
+app.get('/products/:key',(req,res)=>{
+    const key = req.params.key;
+    client = new MongoClient(uri, { useNewUrlParser: true });
+    
+    client.connect(err => {
+        const collection = client.db("onlineStore").collection("products");
+        collection.find({key}).toArray((err,documents)=>{
+            if(err)
+            {
+                res.status(500).send({message:err})
+            }
+            else
+            {
+                console.log("Successfully Inserted ");
+                res.send(documents[0]);
+            }
+        });
+        //console.log("database connected....");
+        client.close();
+    });
 })
+
+app.post('/getCartProduct',(req,res)=>{
+    client = new MongoClient(uri, { useNewUrlParser: true });
+     const productKeys = req.body;
+     console.log(productKeys);
+     client.connect(err => {
+         const collection = client.db("onlineStore").collection("products");
+         collection.find({key :{$in:productKeys}}).toArray((err,documents)=>{
+            if(err)
+            {
+                res.status(500).send({message:err})
+            }
+            else
+            {
+                console.log("Successfully Inserted ");
+                res.send(documents);
+            }
+        });
+         //console.log("database connected....");
+         client.close();
+     });
+ })
+
+ app.post('/placeOrder',(req,res)=>{
+    client = new MongoClient(uri, { useNewUrlParser: true });
+     const orderDetails = req.body;
+     orderDetails.placedAt = new Date();
+     //console.log(orderDetails);
+     client.connect(err => {
+         const collection = client.db("onlineStore").collection("orders");
+         collection.insertOne(orderDetails,(err,result)=>{
+             if(err)
+             {
+                res.status(500).send({message:err})
+             }
+             else
+             {
+                res.send(result.ops[0])
+             }
+         });
+         //console.log("database connected....");
+         client.close();
+     });
+ })
 
 app.post('/addProduct',(req,res)=>{
    client = new MongoClient(uri, { useNewUrlParser: true });
@@ -72,14 +130,34 @@ app.post('/addProduct',(req,res)=>{
             }
             else
             {
-                console.log("Successfully Inserted ");
+                //console.log("Successfully Inserted ");
                 res.send(result.ops[0])
             }
         });
-        console.log("database connected....");
+        //console.log("database connected....");
         client.close();
     });
 })
+app.post('/addAllProducts',(req,res)=>{
+    client = new MongoClient(uri, { useNewUrlParser: true });
+     const product = req.body;
+     client.connect(err => {
+         const collection = client.db("onlineStore").collection("products");
+         collection.insert(product,(err,result)=>{
+             if(err)
+             {
+                 res.status(500).send({message:err})
+             }
+             else
+             {
+                 //console.log("Successfully Inserted ");
+                 res.send(result.ops[0])
+             }
+         });
+         //console.log("database connected....");
+         client.close();
+     });
+ })
 app.post('/saveProduct/:id',(req,res)=>{
     client = new MongoClient(uri, { useNewUrlParser: true });
     const productId =req.params.id;
@@ -102,7 +180,7 @@ app.post('/saveProduct/:id',(req,res)=>{
                 }
             })
     })
-    console.log("database connected....");
+    //console.log("database connected....");
     client.close();
 })
 app.get('/editProduct/:id',(req,res)=>{
@@ -122,7 +200,7 @@ app.get('/editProduct/:id',(req,res)=>{
             }
         })
     })
-    console.log("database connected....");
+    //console.log("database connected....");
     client.close();
 })
 app.get('/deleteProduct/:id',(req,res)=>{
@@ -141,7 +219,7 @@ app.get('/deleteProduct/:id',(req,res)=>{
             }
         });
     });
-    console.log("database connected....");
+    //console.log("database connected....");
     client.close();
 })
 const port =process.env.PORT || 3000;
