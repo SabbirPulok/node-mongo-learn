@@ -91,7 +91,6 @@ app.post('/getCartProduct',(req,res)=>{
                 res.send(documents);
             }
         });
-         //console.log("database connected....");
          client.close();
      });
  })
